@@ -1,0 +1,35 @@
+version: '3'
+services:
+  supermarkt-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile-generate
+    image: supermarkt
+    container_name: supermarkt-generator
+    volumes:
+      - datenaustausch:/app/csv_data  # Neues Volume für die CSV-Dateien
+
+  datenbank:
+    image: postgres:latest
+    container_name: postgres-container
+    environment:
+      POSTGRES_DB: meine-datenbank
+      POSTGRES_USER: mein-benutzer
+      POSTGRES_PASSWORD: mein-passwort
+    ports:
+      - "5432:5432"
+
+  ingestion-service:
+    build:
+      context: .
+      dockerfile: Dockerfile-ingestion
+    image: ingestion-service
+    container_name: ingestion-service
+    command: ["python", "ingestion.py"]
+    depends_on:
+      - datenbank
+    volumes:
+      - datenaustausch:/app/csv_data  # Nutze dasselbe Volume für den Zugriff auf die CSV-Dateien
+
+volumes:
+  datenaustausch:  # Definiere das neue Volume
