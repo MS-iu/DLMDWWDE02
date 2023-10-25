@@ -3,11 +3,11 @@ services:
   supermarkt-generator:
     build:
       context: .
-      dockerfile: Dockerfile-generate
+      dockerfile: docker/Dockerfile-generate
     image: supermarkt
     container_name: supermarkt-generator
     volumes:
-      - datenaustausch:/app/csv_data  # Neues Volume für die CSV-Dateien
+      - ./data/csv_data:/app/csv_data
 
   datenbank:
     image: postgres:latest
@@ -18,18 +18,43 @@ services:
       POSTGRES_PASSWORD: mein-passwort
     ports:
       - "5432:5432"
+    volumes:
+      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
-  ingestion-service:
+  airflow-webserver:
     build:
       context: .
-      dockerfile: Dockerfile-ingestion
-    image: ingestion-service
-    container_name: ingestion-service
-    command: ["python", "ingestion.py"]
+      dockerfile: docker/Dockerfile-airflow
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data/csv_data:/app/csv_data
+    ports:
+      - "8080:8080"
+    command: webserver
     depends_on:
       - datenbank
-    volumes:
-      - datenaustausch:/app/csv_data  # Nutze dasselbe Volume für den Zugriff auf die CSV-Dateien
+    networks:
+      - airflow-net
 
-volumes:
-  datenaustausch:  # Definiere das neue Volume
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-airflow
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data/csv_data:/app/csv_data
+    command: scheduler
+    depends_on:
+      - datenbank
+    networks:
+      - airflow-net
+
+networks:
+  airflow-net:
+

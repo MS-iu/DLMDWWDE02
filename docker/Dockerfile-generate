@@ -4,13 +4,8 @@ FROM python:3.9
 # Setzen Sie das Arbeitsverzeichnis innerhalb des Containers
 WORKDIR /app
 
-# Kopieren Sie die Anwendungsdateien in das Arbeitsverzeichnis
-COPY . /app/
-
-
-# Installieren Sie die erforderlichen Python-Bibliotheken
-RUN pip install pandas
+# Kopieren Sie nur das notwendige Python-Skript in das Arbeitsverzeichnis
+COPY scripts/generate_supermarkt_daten.py /app/
 
 # Führen Sie die Python-Anwendung aus, um Daten zu generieren und als CSV-Datei abzulegen
 CMD ["python3", "generate_supermarkt_daten.py"]
-
