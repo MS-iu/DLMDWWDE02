@@ -8,6 +8,8 @@ services:
     container_name: supermarkt-generator
     volumes:
       - ./data/csv_data:/app/csv_data
+    networks:
+      - airflow-net
 
   datenbank:
     image: postgres:latest
@@ -20,6 +22,8 @@ services:
       - "5432:5432"
     volumes:
       - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - airflow-net
 
   airflow-webserver:
     build:
@@ -28,6 +32,7 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Local
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mein-benutzer:mein-passwort@datenbank:5432/meine-datenbank
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data/csv_data:/app/csv_data
@@ -46,6 +51,7 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Local
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mein-benutzer:mein-passwort@datenbank:5432/meine-datenbank
     volumes:
       - ./dags:/opt/airflow/dags
       - ./data/csv_data:/app/csv_data

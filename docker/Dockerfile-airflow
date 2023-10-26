@@ -6,7 +6,7 @@ ARG AIRFLOW_VERSION=2.2.2
 
 # Umgebungsvariablen setzen
 ENV AIRFLOW_HOME=/usr/local/airflow
-ENV AIRFLOW_DEPS=""
+ENV AIRFLOW_DEPS="postgres"
 
 # Airflow benötigt dieses Verzeichnis
 USER root
