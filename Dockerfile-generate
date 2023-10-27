@@ -5,7 +5,10 @@ FROM python:3.9
 WORKDIR /app
 
 # Kopieren Sie nur das notwendige Python-Skript in das Arbeitsverzeichnis
-COPY scripts/generate_supermarkt_daten.py /app/
+COPY generate_supermarkt_daten.py /app/
 
 # Führen Sie die Python-Anwendung aus, um Daten zu generieren und als CSV-Datei abzulegen
 CMD ["python3", "generate_supermarkt_daten.py"]
+
+# Dieses Kommando hält den Container am Laufen
+CMD ["tail", "-f", "/dev/null"]

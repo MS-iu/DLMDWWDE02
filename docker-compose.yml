@@ -1,66 +1,44 @@
-version: '3'
+version: '3.8'
+
 services:
-  supermarkt-generator:
+  # Supermarkt Data Generator
+  supermarkt_data_gen:
     build:
       context: .
-      dockerfile: docker/Dockerfile-generate
-    image: supermarkt
-    container_name: supermarkt-generator
+      dockerfile: Dockerfile-generate
     volumes:
-      - ./data/csv_data:/app/csv_data
-    networks:
-      - airflow-net
+      - data-volume:/app/csv_data
 
-  datenbank:
-    image: postgres:latest
-    container_name: postgres-container
+  # MySQL Database
+  mysql_db:
+    image: mysql:8.0
     environment:
-      POSTGRES_DB: meine-datenbank
-      POSTGRES_USER: mein-benutzer
-      POSTGRES_PASSWORD: mein-passwort
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: supermarkt_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: rootpassword
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    networks:
-      - airflow-net
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Hinzufügen dieser Zeile
 
-  airflow-webserver:
+  # Import data to MySQL
+  data_importer:
     build:
       context: .
-      dockerfile: docker/Dockerfile-airflow
-    environment:
-      - LOAD_EX=n
-      - EXECUTOR=Local
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mein-benutzer:mein-passwort@datenbank:5432/meine-datenbank
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./data/csv_data:/app/csv_data
-    ports:
-      - "8080:8080"
-    command: webserver
+      dockerfile: Dockerfile-import
     depends_on:
-      - datenbank
-    networks:
-      - airflow-net
-
-  airflow-scheduler:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile-airflow
+      - supermarkt_data_gen
+      - mysql_db
     environment:
-      - LOAD_EX=n
-      - EXECUTOR=Local
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://mein-benutzer:mein-passwort@datenbank:5432/meine-datenbank
+      DB_HOST: mysql_db
+      DB_USER: user
+      DB_PASSWORD: rootpassword
+      DB_NAME: supermarkt_db
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./data/csv_data:/app/csv_data
-    command: scheduler
-    depends_on:
-      - datenbank
-    networks:
-      - airflow-net
+      - data-volume:/app/csv_data
 
-networks:
-  airflow-net:
-
+volumes:
+  mysql-data:
+  data-volume:

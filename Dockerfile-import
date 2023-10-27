@@ -1,0 +1,25 @@
+# Basis-Image festlegen
+FROM python:3.9-slim
+
+# Setzen Sie das Arbeitsverzeichnis innerhalb des Containers
+WORKDIR /app
+
+# Kopieren Sie das wait-for-it.sh-Skript in den Container und setzen Sie die Ausführungsrechte
+COPY wait-for-it.sh /app/wait-for-it.sh
+
+# Installieren Sie erforderliche Pakete
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y netcat-traditional dos2unix
+RUN pip install mysql-connector-python
+
+# Konvertieren Sie Skripte, um Windows-Zeilenumbrüche zu entfernen
+RUN dos2unix /app/wait-for-it.sh
+
+# Kopieren Sie das Python-Skript zum Importieren von Daten
+COPY import_to_mysql.py /app/
+RUN dos2unix /app/import_to_mysql.py
+
+# Setzen Sie die Ausführungsrechte für das wait-for-it.sh-Skript
+RUN chmod +x /app/wait-for-it.sh
+
+# Führen Sie das wait-for-it.sh-Skript aus, um auf die Datenbank zu warten, und führen Sie dann das Python-Skript aus
+CMD ["/app/wait-for-it.sh", "mysql_db:3306", "--", "python3", "/app/import_to_mysql.py"]
