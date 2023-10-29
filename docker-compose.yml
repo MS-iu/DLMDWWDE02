@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile-generate
     volumes:
       - data-volume:/app/csv_data
+      - C:\Users\micha\Desktop\csv_data:/app/csv_data_desktop
 
   # MySQL Database
   mysql_db:
