@@ -13,6 +13,7 @@ services:
   # MySQL Database
   mysql_db:
     image: mysql:8.0
+    restart: on-failure
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: supermarkt_db

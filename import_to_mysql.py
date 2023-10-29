@@ -41,3 +41,5 @@ for i in range(1, 11):  # 10 Supermärkte
 conn.commit()
 cursor.close()
 conn.close()
+
+print("CSV-Dateien wurden erfolgreich geladen.")

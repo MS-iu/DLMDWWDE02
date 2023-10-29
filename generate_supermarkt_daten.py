@@ -5,7 +5,7 @@ import os
 
 # Anpassbare Parameter
 supermarkt_anzahl = 10
-datensatz_pro_tag = 1200  # Maximaler Umsatz pro Tag
+datensatz_pro_tag = 3000  # Maximaler Umsatz pro Tag
 tage = 90
 artikel_anzahl = 500  # Anzahl der Artikel, die generiert werden sollen
 
