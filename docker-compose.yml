@@ -56,6 +56,23 @@ services:
     volumes:
       - data-volume:/app/csv_data
 
+
+ # Daten plotten
+  data_visualizer:
+    build:
+      context: .
+      dockerfile: Dockerfile-visualize
+    depends_on:
+      - spark_aggregator
+    environment:
+      DB_HOST: mysql_db
+      DB_USER: user
+      DB_PASSWORD: rootpassword
+      DB_NAME: supermarkt_db
+    volumes:
+      - data-volume:/app/csv_data
+      - C:\Users\micha\Desktop\csv_data:/app/csv_data_desktop
+
 volumes:
   mysql-data:
   data-volume:

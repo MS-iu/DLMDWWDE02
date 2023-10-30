@@ -1,0 +1,16 @@
+FROM python:3.9
+
+WORKDIR /app
+
+# Aktualisieren der Paketlisten und Installieren des MySQL-Clients
+RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
+
+
+# Installiere benötigte Python-Bibliotheken
+RUN pip install mysql-connector-python pandas matplotlib
+
+# Füge Skript für Datenvisualisierung und Warte-Skript hinzu
+COPY visualize_data.py /app/
+COPY wait-for-aggregate.sh /app/wait-for-aggregate.sh
+
+CMD ["/app/wait-for-aggregate.sh", "python3", "/app/visualize_data.py"]

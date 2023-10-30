@@ -6,7 +6,7 @@ DB_HOST="mysql_db"
 DB_USER="user"
 DB_PASSWORD="rootpassword"
 DB_NAME="supermarkt_db"
-FLAG_TABLE="import_status"
+FLAG_TABLE="aggregate_status"
 COMPLETION_FLAG="completed"
 
 while true; do
@@ -15,9 +15,9 @@ while true; do
 
         break
     fi
-    echo "Warten auf Datenimport-Fertigstellungsflagge..."
+    echo "Warten auf Aggregate-Fertigstellungsflagge..."
     sleep 30
 done
 
-echo "Datenimport-Fertigstellungsflagge gefunden, fahre fort..."
+echo "Aggregate-Fertigstellungsflagge gefunden, fahre fort..."
 exec "$@"

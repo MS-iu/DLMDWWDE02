@@ -3,13 +3,20 @@ FROM jupyter/pyspark-notebook
 # Als root ausführen
 USER root
 
+# System-Utilities aktualisieren
+RUN apt-get update && apt-get upgrade -y
+
 # Installieren der notwendigen Pakete für MySQL-Verbindungen
-RUN apt-get update && apt-get install -y mysql-client
+RUN apt-get install -y mysql-client unzip
 
 # MySQL JDBC Treiber installieren
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.26.zip -O /tmp/mysql-connector-java.zip && \
     unzip /tmp/mysql-connector-java.zip -d /tmp && \
     cp /tmp/mysql-connector-java-8.0.26/mysql-connector-java-8.0.26.jar $SPARK_HOME/jars/
+
+# Installieren des mysql-connector-python Pakets mit pip3
+RUN pip3 install mysql-connector-python
+
 
 # Spark-Skript und wait-for-import hinzufügen
 COPY spark_aggregate.py /app/spark_aggregate.py
