@@ -20,8 +20,10 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS umsatz (
     id INT AUTO_INCREMENT PRIMARY KEY,
     Datum DATE,
+    Uhrzeit TIME,
     Supermarkt VARCHAR(255),
     Artikelnummer VARCHAR(255),
+    Kassiererin_ID VARCHAR(255),  # Korrektur hier
     Umsatz FLOAT
 )
 """)
@@ -33,13 +35,28 @@ for i in range(1, 11):  # 10 Supermärkte
         reader = csv.reader(file)
         next(reader)  # Überspringen Sie die Kopfzeile
         for row in reader:
-            datum, supermarkt, artikelnummer, umsatz = row
-            cursor.execute("INSERT INTO umsatz (Datum, Supermarkt, Artikelnummer, Umsatz) VALUES (%s, %s, %s, %s)",
-                           (datum, supermarkt, artikelnummer, float(umsatz)))
+            datum, uhrzeit, supermarkt, artikelnummer, umsatz, kassiererin_id = row
+            cursor.execute("INSERT INTO umsatz (Datum, Uhrzeit, Supermarkt, Artikelnummer, Umsatz, Kassiererin_ID) VALUES (%s, %s, %s, %s, %s, %s)",
+                           (datum, uhrzeit, supermarkt, artikelnummer, float(umsatz), kassiererin_id))
+
+print("CSV-Dateien wurden erfolgreich geladen.")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS import_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+cursor.execute("INSERT INTO import_status (status) VALUES ('completed')")
+
+
+print("Flagge wurde erfolgreich gesetzt.")
+
 
 # Änderungen speichern und Verbindung schließen
 conn.commit()
 cursor.close()
 conn.close()
 
-print("CSV-Dateien wurden erfolgreich geladen.")
+print("Import abgeschlossen.")

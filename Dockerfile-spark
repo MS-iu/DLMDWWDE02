@@ -1,0 +1,20 @@
+FROM jupyter/pyspark-notebook
+
+# Als root ausführen
+USER root
+
+# Installieren der notwendigen Pakete für MySQL-Verbindungen
+RUN apt-get update && apt-get install -y mysql-client
+
+# MySQL JDBC Treiber installieren
+RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.26.zip -O /tmp/mysql-connector-java.zip && \
+    unzip /tmp/mysql-connector-java.zip -d /tmp && \
+    cp /tmp/mysql-connector-java-8.0.26/mysql-connector-java-8.0.26.jar $SPARK_HOME/jars/
+
+# Spark-Skript und wait-for-import hinzufügen
+COPY spark_aggregate.py /app/spark_aggregate.py
+COPY wait-for-import.sh /app/wait-for-import.sh
+
+# Berechtigungen für das Skript setzen und als Eintrittspunkt verwenden
+RUN chmod +x /app/wait-for-import.sh
+CMD ["/app/wait-for-import.sh", "spark-submit", "/app/spark_aggregate.py"]

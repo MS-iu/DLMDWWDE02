@@ -23,7 +23,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Hinzufügen dieser Zeile
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # Import data to MySQL
   data_importer:
@@ -33,6 +33,21 @@ services:
     depends_on:
       - supermarkt_data_gen
       - mysql_db
+    environment:
+      DB_HOST: mysql_db
+      DB_USER: user
+      DB_PASSWORD: rootpassword
+      DB_NAME: supermarkt_db
+    volumes:
+      - data-volume:/app/csv_data
+
+ # Apache Spark Service
+  spark_aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile-spark
+    depends_on:
+      - data_importer
     environment:
       DB_HOST: mysql_db
       DB_USER: user

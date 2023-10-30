@@ -11,7 +11,7 @@ shift
 
 until nc -z -v -w30 $host $port; do
   echo "Warten auf $host:$port..."
-  sleep 10
+  sleep 30
 done
 
 echo "$host:$port ist verfügbar, fahre fort..."
