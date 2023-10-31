@@ -3,89 +3,112 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Verbindung zur MySQL Datenbank herstellen
-conn = mysql.connector.connect(
-    host='mysql_db',
-    user='user',
-    password='rootpassword',
-    database='supermarkt_db'
-)
+def establish_connection():
+    return mysql.connector.connect(
+        host='mysql_db',
+        user='user',
+        password='rootpassword',
+        database='supermarkt_db'
+    )
 
 desktop_directory = '/app/csv_data_desktop'
 
 # Daten aus der Datenbank abrufen und in DataFrame konvertieren
-def fetch_data(query):
-    return pd.read_sql(query, conn)
+def fetch_data(query, connection):
+    return pd.read_sql(query, connection)
 
 # 1. Monatlicher Gesamtumsatz pro Supermarkt
-monthly_sales_query = """
-SELECT MONTH(Datum) as Monat, YEAR(Datum) as Jahr, Supermarkt, SUM(Umsatz) as Gesamtumsatz
-FROM umsatz
-GROUP BY Jahr, Monat, Supermarkt
-ORDER BY Jahr, Monat, Supermarkt;
-"""
-monthly_sales = fetch_data(monthly_sales_query)
-monthly_sales_pivot = monthly_sales.pivot_table(index=['Jahr', 'Monat'], columns='Supermarkt', values='Gesamtumsatz')
-monthly_sales_pivot.plot(kind='bar', figsize=(15, 7))
-plt.title('Monatlicher Gesamtumsatz pro Supermarkt')
-plt.ylabel('Umsatz')
-plt.xlabel('Monat, Jahr')
-plt.tight_layout()
-plt.savefig("/app/csv_data/monthly_sales.png")
-plt.savefig(f"{desktop_directory}/monthly_sales.png")
-plt.close()
-
-# 2. Top 5 Artikel pro Supermarkt
-top_articles_query = """
-SELECT Supermarkt, Artikelnummer, SUM(Umsatz) as Gesamtumsatz
-FROM umsatz
-GROUP BY Supermarkt, Artikelnummer
-ORDER BY Supermarkt, Gesamtumsatz DESC;
-"""
-top_articles = fetch_data(top_articles_query)
-top_5_articles = top_articles.groupby("Supermarkt").head(5)
-for market in top_5_articles['Supermarkt'].unique():
-    subset = top_5_articles[top_5_articles['Supermarkt'] == market]
-    subset.plot(x='Artikelnummer', y='Gesamtumsatz', kind='bar', legend=False)
-    plt.title(f'Top 5 Artikel für {market}')
+def monthly_sales_per_supermarket(connection):
+    monthly_sales_query = """
+    SELECT Monat, Supermarkt, SUM(`sum(Umsatz)`) as Gesamtumsatz
+    FROM monthly_sales
+    GROUP BY Monat, Supermarkt
+    """
+    monthly_sales = fetch_data(monthly_sales_query, connection)
+    pivot_monthly_sales = monthly_sales.pivot(index='Monat', columns='Supermarkt', values='Gesamtumsatz')
+    pivot_monthly_sales.plot(kind='bar', figsize=(15, 7))
+    plt.title('Monatlicher Gesamtumsatz pro Supermarkt')
     plt.ylabel('Umsatz')
     plt.tight_layout()
-    plt.savefig(f"/app/csv_data/top_articles_{market}.png")
-    plt.savefig(f"{desktop_directory}/top_articles_{market}.png")
+    plt.savefig(f"{desktop_directory}/monthly_sales.png")
     plt.close()
 
-# 3. Umsatz pro Kassiererin in jedem Supermarkt
-sales_per_cashier_query = """
-SELECT Supermarkt, Kassiererin_ID, SUM(Umsatz) as Gesamtumsatz
-FROM umsatz
-GROUP BY Supermarkt, Kassiererin_ID;
-"""
-sales_per_cashier = fetch_data(sales_per_cashier_query)
-for market in sales_per_cashier['Supermarkt'].unique():
-    subset = sales_per_cashier[sales_per_cashier['Supermarkt'] == market]
-    subset.plot(x='Kassiererin_ID', y='Gesamtumsatz', kind='bar', legend=False)
-    plt.title(f'Umsatz pro Kassiererin in {market}')
+# 2. Top 20 Artikel über alle Supermärkte
+def top_20_articles_over_all_supermarkets(connection):
+    top_articles_query = """
+    SELECT Artikelnummer, Supermarkt, SUM(`sum(Umsatz)`) as Gesamtumsatz
+    FROM top_articles
+    GROUP BY Artikelnummer, Supermarkt
+    ORDER BY Gesamtumsatz DESC
+    """
+    top_articles = fetch_data(top_articles_query, connection)
+    top_20_articles = top_articles.groupby('Artikelnummer').Gesamtumsatz.sum().nlargest(20).index.tolist()
+    filtered_top_articles = top_articles[top_articles['Artikelnummer'].isin(top_20_articles)]
+    pivot_top_articles = filtered_top_articles.pivot(index='Artikelnummer', columns='Supermarkt', values='Gesamtumsatz')
+
+    # Sortiere die Pivot-Tabelle basierend auf dem Gesamtumsatz für jeden Artikel
+    sorted_articles = pivot_top_articles.sum(axis=1).sort_values(ascending=False).index
+    pivot_top_articles = pivot_top_articles.loc[sorted_articles]
+
+    pivot_top_articles.plot(kind='bar', stacked=True, figsize=(15, 7))
+    plt.title('Top 20 Artikel über alle Supermärkte')
     plt.ylabel('Umsatz')
     plt.tight_layout()
-    plt.savefig(f"/app/csv_data/sales_per_cashier_{market}.png")
-    plt.savefig(f"{desktop_directory}/sales_per_cashier_{market}.png")
+    plt.savefig(f"{desktop_directory}/top_articles.png")
     plt.close()
 
-# 4. Tageszeit und Wochentag abhängigen Umsatz pro Supermarkt
-time_sales_query = """
-SELECT HOUR(Uhrzeit) as Stunde, DAYNAME(Datum) as Wochentag, Supermarkt, SUM(Umsatz) as Gesamtumsatz
-FROM umsatz
-GROUP BY Wochentag, Stunde, Supermarkt;
-"""
-time_sales = fetch_data(time_sales_query)
-time_sales_pivot = time_sales.pivot_table(index=['Wochentag', 'Stunde'], columns='Supermarkt', values='Gesamtumsatz')
-time_sales_pivot.plot(kind='line', figsize=(15, 7))
-plt.title('Tageszeit und Wochentag abhängiger Umsatz pro Supermarkt')
-plt.ylabel('Umsatz')
-plt.xlabel('Wochentag, Stunde')
-plt.tight_layout()
-plt.savefig("/app/csv_data/time_sales.png")
-plt.savefig(f"{desktop_directory}/time_sales.png")
-plt.close()
+# 3. Umsatz pro Kassiererin in allen Supermärkten
+def sales_per_cashier(connection):
+    cashier_sales_query = """
+    SELECT Kassiererin_ID, SUM(`sum(Umsatz)`) as Gesamtumsatz
+    FROM sales_per_cashier
+    GROUP BY Kassiererin_ID
+    """
+    cashier_sales = fetch_data(cashier_sales_query, connection)
 
-# Schließen der Verbindung
-conn.close()
+    # Sortiere die Daten basierend auf dem Gesamtumsatz in absteigender Reihenfolge
+    cashier_sales = cashier_sales.sort_values(by='Gesamtumsatz', ascending=False)
+
+    cashier_sales.plot(x='Kassiererin_ID', y='Gesamtumsatz', kind='bar', figsize=(15, 7))
+    plt.title('Umsatz pro Kassiererin in allen Supermärkten')
+    plt.ylabel('Umsatz')
+    plt.tight_layout()
+    plt.savefig(f"{desktop_directory}/cashier_sales.png")
+    plt.close()
+
+
+# 4. Tageszeitabhängiger Umsatz aller Supermärkte über 24h
+def day_time_sales(connection):
+    time_sales_query = """
+    SELECT Stunde, Supermarkt, SUM(`sum(Umsatz)`) as Gesamtumsatz
+    FROM time_sales
+    GROUP BY Stunde, Supermarkt
+    """
+    time_sales = fetch_data(time_sales_query, connection)
+    pivot_time_sales = time_sales.pivot(index='Stunde', columns='Supermarkt', values='Gesamtumsatz')
+
+    # Verwende kind='area' für gestapelte Flächendiagramme
+    pivot_time_sales.plot(kind='area', stacked=True, figsize=(15, 7))
+
+    plt.title('Tageszeitabhängiger Umsatz aller Supermärkte über 24h')
+    plt.ylabel('Umsatz')
+    plt.xlabel('Stunde')
+    plt.tight_layout()
+    plt.savefig(f"{desktop_directory}/time_sales.png")
+    plt.close()
+
+
+# Hauptfunktion, die alles ausführt
+def main():
+    connection = establish_connection()
+
+    monthly_sales_per_supermarket(connection)
+    top_20_articles_over_all_supermarkets(connection)
+    sales_per_cashier(connection)
+    day_time_sales(connection)
+
+    connection.close()
+
+# Ausführen des Hauptprogramms
+if __name__ == '__main__':
+    main()

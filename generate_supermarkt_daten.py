@@ -8,7 +8,7 @@ supermarkt_anzahl = 10
 tage = 90
 artikel_anzahl = 1500
 kassiererinnen_pro_supermarkt = 5
-gesamtziel = 100000  # Zielanzahl von Datensätzen
+gesamtziel = 1000000  # Zielanzahl von Datensätzen
 
 # Pfade zum Speichern der CSV-Dateien
 volume_csv_directory = '/app/csv_data'
