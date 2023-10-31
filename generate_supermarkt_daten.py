@@ -40,7 +40,16 @@ for i, supermarkt in enumerate(supermärkte):
         aktuelles_datum = start_datum + datetime.timedelta(days=j)
         supermarkt_datensätze = []
 
-        for _ in range(datensätze_pro_tag):
+        # Jeder Artikel wird mindestens 100-mal hinzugefügt
+        for artikel in artikel_liste:
+            for _ in range(100):
+                umsatz = round(random.uniform(1, 100), 2)
+                zeit = zufällige_uhrzeit()
+                kassiererin = random.choice(kassiererinnen)
+                supermarkt_datensätze.append([aktuelles_datum, zeit, supermarkt, artikel, umsatz, kassiererin])
+
+        # Wenn benötigt, können zusätzliche zufällige Artikel hinzugefügt werden
+        while len(supermarkt_datensätze) < datensätze_pro_tag:
             artikel = random.choice(artikel_liste)
             umsatz = round(random.uniform(1, 100), 2)
             zeit = zufällige_uhrzeit()

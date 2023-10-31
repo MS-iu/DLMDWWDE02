@@ -71,7 +71,7 @@ def sales_per_cashier(connection):
     cashier_sales = fetch_data(cashier_sales_query, connection)
     cashier_sales = cashier_sales.sort_values(by='Gesamtumsatz', ascending=False)
     cashier_sales.plot(x='Kassiererin_ID', y='Gesamtumsatz', kind='bar', figsize=(15, 7))
-    plt.ylim([cashier_sales['Gesamtumsatz'].min()-10000, cashier_sales['Gesamtumsatz'].max()]+10000)  # y-Achse anpassen
+    plt.ylim([cashier_sales['Gesamtumsatz'].min()-10000, cashier_sales['Gesamtumsatz'].max()+10000])  # y-Achse anpassen
     plt.title('Umsatz pro Kassiererin in allen Supermärkten')
     plt.ylabel('Umsatz')
     plt.tight_layout()
