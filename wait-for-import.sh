@@ -16,7 +16,7 @@ while true; do
         break
     fi
     echo "Warten auf Datenimport-Fertigstellungsflagge..."
-    sleep 30
+    sleep 120
 done
 
 echo "Datenimport-Fertigstellungsflagge gefunden, fahre fort..."

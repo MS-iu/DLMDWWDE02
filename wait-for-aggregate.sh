@@ -16,7 +16,7 @@ while true; do
         break
     fi
     echo "Warten auf Aggregate-Fertigstellungsflagge..."
-    sleep 30
+    sleep 120
 done
 
 echo "Aggregate-Fertigstellungsflagge gefunden, fahre fort..."
