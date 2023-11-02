@@ -1,27 +1,34 @@
+# Apache Spark Service
+# Dieser Service nutzt Apache Spark, um die Daten zu aggregieren oder zu analysieren.
+# Ausgangspunkt ist ein vorkonfiguriertes Jupyter-Notebook mit PySpark, um die Einrichtung zu erleichtern.
+
 FROM jupyter/pyspark-notebook
 
-# Als root ausführen
+# Wechselt zum Benutzer 'root', um Systemänderungen durchzuführen.
 USER root
 
-# System-Utilities aktualisieren
+# Aktualisiert die Paketlisten und Pakete des Linux-Systems, um Sicherheit und Funktionalität zu gewährleisten.
 RUN apt-get update && apt-get upgrade -y
 
-# Installieren der notwendigen Pakete für MySQL-Verbindungen
+# Installiert MySQL-Client und unzip, da beides erforderlich für Datenbankinteraktionen und Paketentpackung ist.
 RUN apt-get install -y mysql-client unzip
 
-# MySQL JDBC Treiber installieren
+# Lädt den MySQL JDBC Treiber herunter und fügt ihn dem Spark-Classpath hinzu, um die Verbindung zu MySQL zu ermöglichen.
 RUN wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.26.zip -O /tmp/mysql-connector-java.zip && \
     unzip /tmp/mysql-connector-java.zip -d /tmp && \
     cp /tmp/mysql-connector-java-8.0.26/mysql-connector-java-8.0.26.jar $SPARK_HOME/jars/
 
-# Installieren des mysql-connector-python Pakets mit pip3
+# Installiert das mysql-connector-python Paket, um MySQL-Verbindungen aus Python-Code heraus zu ermöglichen.
 RUN pip3 install mysql-connector-python
 
 
-# Spark-Skript und wait-for-import hinzufügen
+# Kopiert die Spark-Aggregations- und Warte-Skripte in das Container-Verzeichnis.
+# Das wait Skript sorgt dafür, dass die Aggregierung erst startet wenn der import abgeschlossen ist.
+# Dafür wird mit Abschluss des Imports eine Tabelle in der Datenbank erzeugt.
+# Soabld in diese Tabelle "completed" geschrieben wird, startet die Aggregierung.
 COPY spark_aggregate.py /app/spark_aggregate.py
 COPY wait-for-import.sh /app/wait-for-import.sh
 
-# Berechtigungen für das Skript setzen und als Eintrittspunkt verwenden
+# Setzt die Ausführungsberechtigungen für das Warte-Skript und definiert es als den Standardbefehl beim Containerstart.
 RUN chmod +x /app/wait-for-import.sh
 CMD ["/app/wait-for-import.sh", "spark-submit", "/app/spark_aggregate.py"]

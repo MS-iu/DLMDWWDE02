@@ -1,11 +1,15 @@
-# Verwenden Sie ein offizielles Python-Image als Basis
+# Supermarkt Data Generator
+# Dieser Service ist zuständig für das Erzeugen der fiktiven Supermarktdaten.
+# Er verwendet ein offizielles Python-Image als Basis.
+
 FROM python:3.9
 
-# Setzen Sie das Arbeitsverzeichnis innerhalb des Containers
+# Setzt /app als Verzeichnis, in dem die Containerbefehle ausgeführt werden.
 WORKDIR /app
 
-# Kopieren Sie nur das notwendige Python-Skript in das Arbeitsverzeichnis
+# Kopiert nur das notwendige Python-Skript in das Arbeitsverzeichnis
 COPY generate_supermarkt_daten.py /app/
 
-# Führen Sie die Python-Anwendung alle 90 Tage in einer Endlosschleife aus
+# Führt die Python-Anwendung alle 90 Tage in einer Endlosschleife aus
+# Um regelmäßig alle 90 Tage ausgeführt zu werden, müssen noch weitere Anpassungen in anderen Skripten vorgenommen werden.
 CMD while true; do python3 generate_supermarkt_daten.py; sleep 7776000; done

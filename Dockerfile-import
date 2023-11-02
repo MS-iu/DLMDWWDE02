@@ -1,25 +1,28 @@
-# Basis-Image festlegen
+# Import data to MySQL
+# Dieser Service ist dafür verantwortlich, die generierten Daten in die MySQL-Datenbank zu importieren.
+# Er verwendet ein offizielles Python-Image als Basis.
 FROM python:3.9-slim
 
-# Setzen Sie das Arbeitsverzeichnis innerhalb des Containers
+# Setzt /app als Verzeichnis, in dem die Containerbefehle ausgeführt werden.
 WORKDIR /app
 
-# Kopieren Sie das wait-for-it.sh-Skript in den Container und setzen Sie die Ausführungsrechte
+# Kopiert das wait-for-it.sh-Skript in den Container und setzt die Ausführungsrechte
 COPY wait-for-it.sh /app/wait-for-it.sh
 
-# Installieren Sie erforderliche Pakete
+# Installiert die erforderlichen Pakete
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y netcat-traditional dos2unix
 RUN pip install mysql-connector-python
 
-# Konvertieren Sie Skripte, um Windows-Zeilenumbrüche zu entfernen
+# Konvertiert die Skripte, um Windows-Zeilenumbrüche zu entfernen
 RUN dos2unix /app/wait-for-it.sh
 
-# Kopieren Sie das Python-Skript zum Importieren von Daten
+# Kopiert das Python-Skript zum Importieren von Daten
 COPY import_to_mysql.py /app/
 RUN dos2unix /app/import_to_mysql.py
 
-# Setzen Sie die Ausführungsrechte für das wait-for-it.sh-Skript
+# Setzt die Ausführungsrechte für das wait-for-it.sh-Skript
 RUN chmod +x /app/wait-for-it.sh
 
-# Führen Sie das wait-for-it.sh-Skript aus, um auf die Datenbank zu warten, und führen Sie dann das Python-Skript aus
+# Diese Zeile sorgt dafür, dass das Python import Skript erst dann startet wenn die Datenbank auf Port 3306 erreichbar ist.
+# Das reine "depends on" im compose File reicht nicht aus, da alle Container parallel starten.
 CMD ["/app/wait-for-it.sh", "mysql_db:3306", "--", "python3", "/app/import_to_mysql.py"]

@@ -1,16 +1,29 @@
+
+# Bitte unbedingt vor Start des Programms die Read Me Datei lesen und den hier angegeben Pfad des Volumes ändern!
+
+# Verwendet Version 3.8 des Docker Compose-Dateiformats
 version: '3.8'
 
 services:
   # Supermarkt Data Generator
+  # Dieser Service ist zuständig für das Erzeugen der fiktiven Supermarktdaten.
+  # Er verwendet das Dockerfile-generate zur Erstellung des Images und nutzt Volumes,
+  # um Daten zwischen dem Host und den Containern zu synchronisieren.
   supermarkt_data_gen:
     build:
       context: .
       dockerfile: Dockerfile-generate
     volumes:
       - data-volume:/app/csv_data
+#ACHTUNG! Dieser Pfad speichert die erstellten Dateien für eine bessere Übersichtlichkeit auf der lokalen Maschine des Anwenders!
+#ACHTUNG! Bitte unbedingt anpassen.
       - C:\Users\micha\Desktop\csv_data:/app/csv_data_desktop
 
   # MySQL Database
+  # Definiert einen MySQL-Datenbank-Service.
+  # Passwort und User der Einfachheit halber direkt angegeben.
+  # Füt höheren Datenschutz können User und Passwort in einer separaten verschlüsselten Datei gespeichert werden.
+  # Im Falle eines Fehlers beim Start wird der Container automatisch neu gestartet.
   mysql_db:
     image: mysql:8.0
     restart: on-failure
@@ -23,25 +36,33 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Verweis auf Initialisierungsskript für die Datenbank
 
   # Import data to MySQL
+  # Ein Dienst, der abhängig ist von der Supermarkt Data Generator und der MySQL DB.
+  # Dieser Service ist dafür verantwortlich, die generierten Daten in die MySQL-Datenbank zu importieren.
+  # Hat die längste Laufzeit in der Datenpipline. Versuche mit Big-Data Diensten wie Apache Airflow waren nicht schneller,
+  # daher wurde dieser Dienst aus Sicht der Wartbarkeit und Zuverlässigkeit beibehalten.
+  # Nach Start prüft ein Bash Skript, ob die Datenbank bereits erreicht ist. Erst dann startet der import.
   data_importer:
     build:
       context: .
       dockerfile: Dockerfile-import
     depends_on:
-      - supermarkt_data_gen
+      - supermarkt_data_gen # Abhängigkeit zu anderen Container
       - mysql_db
-    environment:
+    environment:   # Umgebungsvariablen für die Datenbankverbindung.
       DB_HOST: mysql_db
       DB_USER: user
       DB_PASSWORD: rootpassword
       DB_NAME: supermarkt_db
     volumes:
-      - data-volume:/app/csv_data
+      - data-volume:/app/csv_data # Nutzt das gleiche Volume wie der Generator
 
  # Apache Spark Service
+ # Dieser Service nutzt Apache Spark, um die Daten zu aggregieren oder zu analysieren.
+ # Er ist abhängig vom Data Importer, um sicherzustellen, dass die Daten bereits importiert wurden.
+ # Nach Start prüft ein Bash Skript, ob eine spezifische Tabelle in der Datenbank vorhanden ist, erst dann startet die Aggregation.
   spark_aggregator:
     build:
       context: .
@@ -58,6 +79,9 @@ services:
 
 
  # Daten plotten
+ # Ein Service zum Visualisieren der Daten. Er ist abhängig von dem Spark-Aggregator,
+ # um zu garantieren, dass die Daten aggregiert wurden, bevor die Visualisierung stattfindet.
+ # Nach Start prüft ein Bash Skript, ob eine spezifische Tabelle in der Datenbank vorhanden ist, erst dann startet die Visualisierung.
   data_visualizer:
     build:
       context: .
@@ -74,5 +98,5 @@ services:
       - C:\Users\micha\Desktop\csv_data:/app/csv_data_desktop
 
 volumes:
-  mysql-data:
-  data-volume:
+  mysql-data:   # Definiert ein Volume für den Austausch der Ausgangsdaten
+  data-volume:  # Definiert ein Volume für die geteilten CSV-Daten in der lokalen Maschine des Anwenders

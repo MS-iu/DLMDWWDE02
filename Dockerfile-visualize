@@ -1,15 +1,22 @@
+# Daten plotten
+# Dieser Service visualisiert die aggegierten Daten in vier Diagrammen.
+# Er verwendet ein offizielles Python-Image als Basis.
 FROM python:3.9
 
+# Setzt /app als Verzeichnis, in dem die Containerbefehle ausgeführt werden.
 WORKDIR /app
 
-# Aktualisieren der Paketlisten und Installieren des MySQL-Clients
+# Aktualisiert die Paketlisten und installiert den MySQL-Clients um auf die Datenbank zugreifen zu können.
 RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
 
 
-# Installiere benötigte Python-Bibliotheken
+# Installiert die benötigten Python-Bibliotheken für die Visualisierung
 RUN pip install mysql-connector-python pandas matplotlib
 
-# Füge Skript für Datenvisualisierung und Warte-Skript hinzu
+# Kopiert die Visualisierungs- und Warte-Skripte in das Container-Verzeichnis.
+# Das wait Skript sorgt dafür, dass die Visualisierung erst startet wenn der import abgeschlossen ist.
+# Dafür wird mit Abschluss des Imports eine Tabelle in der Datenbank erzeugt.
+# Soabld in diese Tabelle "completed" geschrieben wird, startet die Aggregierung.
 COPY visualize_data.py /app/
 COPY wait-for-aggregate.sh /app/wait-for-aggregate.sh
 
