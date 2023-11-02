@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
 # Import data to MySQL
 # Dieses Python Skript ist dafür verantwortlich, die generierten Daten in die MySQL-Datenbank zu importieren.
 # Dieses Skript hat die längste Laufzeit in der Datenpipline. Versuche mit Big-Data Diensten wie Apache Airflow waren nicht schneller,
 # daher wurde dieser Dienst aus Sicht der Wartbarkeit und Zuverlässigkeit beibehalten.
-# Nachfolgende Zeile sorgt dafür, dass dieses Skript in Python ausgeführt wird.
-#!/usr/bin/env python3
+
 
 import csv
 import mysql.connector
@@ -17,11 +17,14 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
+print("Verbindung zur Datenbank wurde erfolgreich aufgebaut.")
+
 
 # Datenbank erstellen (falls nicht vorhanden)
 cursor.execute("CREATE DATABASE IF NOT EXISTS supermarkt_db")
 cursor.execute("USE supermarkt_db")
 
+print("Datenbank wurde erfolgreich erstellt.")
 
 # Definition und Erstellung der Tabelle 'umsatz', wenn sie noch nicht existiert.
 # Diese Tabelle speichert den Umsatz pro Artikel, verknüpft mit Datum, Uhrzeit, Supermarkt und Kassiererin
@@ -38,12 +41,15 @@ CREATE TABLE IF NOT EXISTS umsatz (
 )
 """)
 
+print("Tabelle umsatz wurde erfolgreich erstellt.")
+
 # Lese CSV-Dateien aus dem Verzeichnis /app/csv_data und füge die Daten in die Datenbanktabelle ein.
 # Die Schleife iteriert durch 10 Supermärkte, entsprechend der Annahme von 10 CSV-Dateien.
 
 path = '/app/csv_data'
 for i in range(1, 11):  # Könnte variabel gestaltet werden, ist aktuell fest
     with open(f"{path}/supermarkt_{i}.csv", 'r') as file:
+        print(f"{path}/supermarkt_{i}.csv wird geladen.")
         reader = csv.reader(file)
         next(reader)  # Überspringen der Kopfzeile
         for row in reader:
@@ -51,6 +57,7 @@ for i in range(1, 11):  # Könnte variabel gestaltet werden, ist aktuell fest
             # Einfügen der Daten in die Tabelle 'umsatz'.
             cursor.execute("INSERT INTO umsatz (Datum, Uhrzeit, Supermarkt, Artikelnummer, Umsatz, Kassiererin_ID) VALUES (%s, %s, %s, %s, %s, %s)",
                            (datum, uhrzeit, supermarkt, artikelnummer, float(umsatz), kassiererin_id))
+
 
 print("CSV-Dateien wurden erfolgreich geladen.")
 

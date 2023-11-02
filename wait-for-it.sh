@@ -17,7 +17,7 @@ done
 echo "$host:$port ist verfügbar, fahre fort..."
 sleep 20  # Wartet zusätzliche 20 Sekunden, um sicherzustellen, dass auch wirklich alle Daten generiert worden sind.
 # Hier könnte ebenfalls auf eine Flagge in der Datenbank gewartet werden.
-echo "Import gestartet."
+echo "Import gestartet. Der Import kann bis zu 5 Minuten dauern."
 
 # Führt das Import Skript aus.
 exec "$@"

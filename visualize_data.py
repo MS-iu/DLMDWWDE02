@@ -113,6 +113,8 @@ def main():
     sales_per_cashier(connection)
     day_time_sales(connection)
     connection.close()
+    print("Diagramme wurden erstellt.")
+    print("Datenverarbeitung abgeschlossen.")
 
 # Führt das Hauptprogramm aus, wenn das Skript direkt ausgeführt wird.
 if __name__ == '__main__':

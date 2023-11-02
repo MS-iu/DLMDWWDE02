@@ -40,3 +40,8 @@ wenn die Datenbank erreichbar ist oder gewissen Tabelleneinträge vorhanden sind
 Die Projektstruktur wurde so konzipiert, dass sie modular, leicht verständlich und einfach erweiterbar ist. 
 Dies wird durch die klare Aufteilung der unterschiedlichen Microservices und ihrer jeweiligen Aufgaben, 
 wie in der Konzept-Zeichnung dargestellt, erreicht.
+
+
+# Zum Ausführen des Skriptes muss das gesamte Projekt idealerweise in PyCharm geöffnet werden.
+# Docker Desktop muss ebenfalls vorhanden sein.
+# Mit Eingabe von docker-compose up in das Terminal startet der Aufbau der Pipeline.
