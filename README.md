@@ -39,7 +39,8 @@ Die lokale Speicherung ermöglicht eine optimale Übersicht über die Ein- und A
 #Schnellstart
 Führen Sie die folgenden Schritte aus, um die Pipeline in Ihrer IDE Umgebung zu starten:
 
-git clone https://github.com/MS-iu/DLMDWWDE02 /
+git clone https://github.com/MS-iu/DLMDWWDE02 //
+Jetzt Pfad in der docker-compose Datei anpassen //
 cd DLMDWWDE02 / 
 docker-compose build --no-cache / 
 docker-compose up
