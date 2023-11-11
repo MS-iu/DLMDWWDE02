@@ -60,4 +60,6 @@ Um alle Volumes zu entfernen und somit alle Daten zu löschen, verwenden Sie:
 
 docker-compose down -v
 
-Pipeline wurde zuletzt getestet am 11.11.2023 um 16:23
+Die erstellten Diagramme befinden sich zusätzlich im Volume csv_data_desktop.
+
+Pipeline wurde zuletzt getestet am 11.11.2023 um 18:42
