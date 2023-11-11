@@ -1,47 +1,60 @@
-# DLMDWWDE02
-# Um die korrekte Ausführung des Skriptes zu ermöglichen muss der lokale Pfad in der Docker-compose Datei angepasst werden.
-# In den dort angegebenen Ordner werden die generierten .csv Dateien, wie auch die geplotteten Diagramme zusätzlich geladen.
-# Dies dient allein der besseren Zugänglichkeit der Ergebnisse des Projekts.
+#DLMDWWDE02 - Batch-basierte Datenarchitektur für eine datenintensive Applikation
+
+Die im Rahmen des Moduls DLMDWWDE02 gebaute Pipeline ist ein robustes, Docker-basiertes System, 
+das für die Verarbeitung und Analyse von Supermarktdaten konzipiert wurde. 
+Das System verwendet eine Serie von Microservices, um eine Million Datensätze zu generieren, diese zu importieren, 
+zu aggregieren und anschließend zu visualisieren.
 
 
-Projekt: Data Engineering
+#Repository
+Das gesamte Projekt ist auf GitHub unter https://github.com/MS-iu/DLMDWWDE02 verfügbar.
 
-Dieses Konzept beschreibt eine im Rahmen des Moduls Data Engineering entwickelte batch-orientierte Datenarchitektur, 
-die sich mit der effektiven Verarbeitung von fiktiv erzeugten Umsatzdaten einer Supermarktkette beschäftigt. 
+#Projektstruktur
+Das Repository ist wie folgt strukturiert:
 
-Innerhalb der Architektur werden Docker-Container für den Aufbau von Microservices eingesetzt um die Verfügbarkeit, 
-Skalierbarkeit und Wartbarkeit des Systems sicherzustellen.
+csv_data: Ein Volume, das die generierten CSV-Daten enthält.
+docker-compose.yml: Die Docker Compose-Konfigurationsdatei, die die Dienste definiert.
+Dockerfile-generate: Das Dockerfile für den Daten Generator Service.
+Dockerfile-import: Das Dockerfile für den Daten Import Service.
+Dockerfile-spark: Das Dockerfile für den Apache Spark Service.
+Dockerfile-visualize: Das Dockerfile für den Daten Visualisierung Service.
+generate_supermarkt_daten.py: Das Skript zum Generieren der Daten.
+import_to_mysql.py: Das Skript zum Importieren der Daten in die MySQL-Datenbank.
+init.sql: Ein SQL-Skript zur Initialisierung der Datenbank und Tabellen.
+README.md: Diese Anleitung.
+spark_aggregate.py: Das Skript, das Apache Spark zur Datenaggregation verwendet.
+visualize_data.py: Das Skript zur Visualisierung der Daten.
+wait-for-import.sh und wait-for-it.sh: Shell-Skripte, die sicherstellen, dass die Dienste in der richtigen Reihenfolge gestartet werden.
 
-Die Realisierung des Konzepts findet in der Entwicklungsumgebung von PyCharm sowie Docker Desktop statt, 
-wobei GitHub für die Verwaltung und Nachvollziehbarkeit der Entwicklung genutzt wird. 
+#Voraussetzungen
+Bevor Sie beginnen, stellen Sie sicher, dass Sie folgende Software installiert haben:
 
-Im initialen Container werden mittels eines Python-Skripts eine Million Supermarktumsatzdaten generiert. 
-Diese Datensätze werden auf zehn separate CSV-Dateien verteilt und sowohl in einem spezifisch deklarierten Volume, 
-als auch lokal auf dem Benutzerdesktop gespeichert.
+Docker
+Docker Compose
+Python 3.x
 
-Parallel zur Datengenerierung wird eine MySQL-Datenbank gestartet, die zum Abschluss des Projekts sieben Tabellen umfassen soll. 
-Diese Datenbank dient als Speicherort sowohl für die ursprünglichen als auch für die später aggregierten Daten.
+Bitte ändern Sie den angegebenen Pfad in der docker-compose.yml Datei, um die Dateien auf den gewünschten lokalen Pfad zu speichern.
+Die lokale Speicherung ermöglicht eine optimale Übersicht über die Ein- und Ausgaben der Pipeline.
 
-Ein weiteres Python-Skript, in einem separaten Container, ist als Import Service für die Übertragung der generierten Datensätze 
-in die zuvor aufgesetzte MySQL-Datenbank verantwortlich. 
+#Schnellstart
+Führen Sie die folgenden Schritte aus, um die Pipeline in Ihrer IDE Umgebung zu starten:
 
-Für die Datenaggregierung wird auf Apache Spark zurückgegriffen, eine führende Technologie im Big-Data Bereich. 
-Dieser spezialisierte Microservice übernimmt die Aufbereitung der Daten, wobei vier definierte Aggregationsprozesse durchgeführt werden sollen.
-Nach Ende der Aggregierung werden die Daten in die MySQL Datenbank zurückgeschrieben.
-
-Abschließend werden die neu erstellten Tabellen aus der Datenbank ausgelesen und in einem weiteren Container mit einem Python-Skript visualisiert. 
-Dieses Skript erzeugt vier unterschiedliche Arten von Diagrammen, welche die Ergebnisse der Datenanalyse grafisch darstellen.
-
-Die Gesamtheit der aufgebauten Datenarchitektur wird in einer Docker Compose-Datei definiert, 
-was eine effiziente Orchestrierung der Microservices und ihrer zugehörigen Abhängigkeiten ermöglichen soll.
-Zur zeitlichen Koordinierung, wird sowohl ein einfaches wait, wie auch Endlosschleifen, die nachfolgende Prozesse erst starten, 
-wenn die Datenbank erreichbar ist oder gewissen Tabelleneinträge vorhanden sind, verwendet.
-
-Die Projektstruktur wurde so konzipiert, dass sie modular, leicht verständlich und einfach erweiterbar ist. 
-Dies wird durch die klare Aufteilung der unterschiedlichen Microservices und ihrer jeweiligen Aufgaben, 
-wie in der Konzept-Zeichnung dargestellt, erreicht.
+git clone https://github.com/MS-iu/DLMDWWDE02
+cd DLMDWWDE02
+docker-compose up --build
 
 
-# Zum Ausführen des Skriptes muss das gesamte Projekt idealerweise in PyCharm geöffnet werden.
-# Docker Desktop muss ebenfalls vorhanden sein.
-# Mit Eingabe von docker-compose up in das Terminal startet der Aufbau der Pipeline.
+Die Dienste werden in der festgelegten Reihenfolge durch docker-compose orchestriert. 
+Nach dem Starten der Container können Sie die Logs verfolgen, um den Fortschritt zu beobachten:
+
+docker-compose logs -f
+
+#Beenden und Aufräumen
+Um die Container zu stoppen und zu entfernen, nutzen Sie:
+
+docker-compose down
+
+Um alle Volumes zu entfernen und somit alle Daten zu löschen, verwenden Sie:
+
+docker-compose down -v
+
