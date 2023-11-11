@@ -15,7 +15,7 @@ services:
     volumes:
       - data-volume:/app/csv_data
 #ACHTUNG! Dieser Pfad speichert die erstellten Dateien für eine bessere Übersichtlichkeit auf der lokalen Maschine des Anwenders!
-#ACHTUNG! Bitte unbedingt anpassen.
+#ACHTUNG! Bitte unbedingt den Pfad zwischen - und : anpassen.
       - C:\Users\micha\Desktop\csv_data:/app/csv_data_desktop
 
   # MySQL Database

@@ -1,6 +1,7 @@
+#!/bin/bash
 # Das Bash-Skript läuft in einer Endlosschleife und prüft regelmäßig die Datenbank auf eine spezifische Bedingung,
 # um mit der Ausführung des eigentlichen Skriptes fortzufahren.,
-#!/bin/bash
+
 
 # Beendet das Skript bei Fehlern, um trotz Fehler einen Durchlauf zu ermöglichen
 set -e
