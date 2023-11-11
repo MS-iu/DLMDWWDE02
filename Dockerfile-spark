@@ -11,6 +11,7 @@ USER root
 RUN apt-get update && apt-get upgrade -y
 
 # Installiert MySQL-Client und unzip, da beides erforderlich für Datenbankinteraktionen und Paketentpackung ist.
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y netcat-traditional dos2unix
 RUN apt-get install -y mysql-client unzip
 
 # Lädt den MySQL JDBC Treiber herunter und fügt ihn dem Spark-Classpath hinzu, um die Verbindung zu MySQL zu ermöglichen.
@@ -28,6 +29,9 @@ RUN pip3 install mysql-connector-python
 # Soabld in diese Tabelle "completed" geschrieben wird, startet die Aggregierung.
 COPY spark_aggregate.py /app/spark_aggregate.py
 COPY wait-for-import.sh /app/wait-for-import.sh
+
+# Konvertiert die Skripte, um Windows-Zeilenumbrüche zu entfernen
+RUN dos2unix /app/wait-for-import.sh
 
 # Setzt die Ausführungsberechtigungen für das Warte-Skript und definiert es als den Standardbefehl beim Containerstart.
 RUN chmod +x /app/wait-for-import.sh

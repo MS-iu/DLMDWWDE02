@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib
 
 
 # Installiert die benötigten Python-Bibliotheken für die Visualisierung
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y netcat-traditional dos2unix
 RUN pip install mysql-connector-python pandas matplotlib
 
 # Kopiert die Visualisierungs- und Warte-Skripte in das Container-Verzeichnis.
@@ -19,5 +20,8 @@ RUN pip install mysql-connector-python pandas matplotlib
 # Soabld in diese Tabelle "completed" geschrieben wird, startet die Aggregierung.
 COPY visualize_data.py /app/
 COPY wait-for-aggregate.sh /app/wait-for-aggregate.sh
+
+# Konvertiert die Skripte, um Windows-Zeilenumbrüche zu entfernen
+RUN dos2unix /app/wait-for-aggregate.sh
 
 CMD ["/app/wait-for-aggregate.sh", "python3", "/app/visualize_data.py"]
