@@ -39,9 +39,10 @@ Die lokale Speicherung ermöglicht eine optimale Übersicht über die Ein- und A
 #Schnellstart
 Führen Sie die folgenden Schritte aus, um die Pipeline in Ihrer IDE Umgebung zu starten:
 
-git clone https://github.com/MS-iu/DLMDWWDE02
-cd DLMDWWDE02
-docker-compose up --build
+git clone https://github.com/MS-iu/DLMDWWDE02 /
+cd DLMDWWDE02 / 
+docker-compose build --no-cache / 
+docker-compose up
 
 
 Die Dienste werden in der festgelegten Reihenfolge durch docker-compose orchestriert. 
@@ -58,3 +59,4 @@ Um alle Volumes zu entfernen und somit alle Daten zu löschen, verwenden Sie:
 
 docker-compose down -v
 
+Pipeline wurde zuletzt getestet am 11.11.2023 um 16:23
